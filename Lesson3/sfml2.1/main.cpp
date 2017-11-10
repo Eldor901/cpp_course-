@@ -1,24 +1,36 @@
 #include <SFML/Graphics.hpp>
-#include <SFML/System.hpp>
 #include <SFML/Window.hpp>
+#include <SFML/System.hpp>
 #include <cmath>
-
-constexpr unsigned WINDOW_WIDTH = 800;
-constexpr unsigned WINDOW_HEIGHT = 600;
+constexpr unsigned WIDTH = 800;
+constexpr unsigned HEIGT = 600;
 int main()
 {
-    constexpr float BALL_SIZE = 40;
+    constexpr int pointCount = 200;
+    const sf::Vector2f ellipseRadius = {400.f, 300.f};
+    const float period = 4.f;
 
-    sf::RenderWindow window(sf::VideoMode({WINDOW_WIDTH, WINDOW_HEIGHT}), "Wave Moving Ball");
+    sf::ContextSettings settings;
+    settings.antialiasingLevel = 8;
+    sf::RenderWindow window(
+        sf::VideoMode({WIDTH, HEIGT}), "Ellipse",
+        sf::Style::Default, settings);
     sf::Clock clock;
 
-    const sf::Vector2f position = {10, 350};
+    sf::ConvexShape ellipse;
+    ellipse.setPosition({400, 320});
+    ellipse.setFillColor(sf::Color(135, 38, 87)); // color raspberry
 
-    sf::CircleShape ball(BALL_SIZE);
-    ball.setFillColor(sf::Color(128, 128, 128));
-    float speedX = 100.f;
-    float time = 0;
-
+    ellipse.setPointCount(pointCount);
+    for (int pointNo = 0; pointNo < pointCount; ++pointNo)
+    {
+        float angle = float(2 * M_PI * pointNo) / float(pointCount);
+        float add = 200 * sin(6 * angle);
+        sf::Vector2f point = {
+            add * std::sin(angle),
+            add * std::cos(angle)};
+        ellipse.setPoint(pointNo, point);
+    }
     while (window.isOpen())
     {
         sf::Event event;
@@ -29,32 +41,15 @@ int main()
                 window.close();
             }
         }
-
-        constexpr float amplitudeY = 80.f;
-        constexpr float periodY = 1;
-
-        const float dt = clock.restart().asSeconds();
-
-        time = dt + time;
-
-        const float wavePhase = time * float(2 * M_PI);
-        const float x = x + speedX * dt;
-        const float y = amplitudeY * std::sin(wavePhase / periodY);
-        const sf::Vector2f offset = {x, y};
-
-        if ((x + 2 * BALL_SIZE >= WINDOW_WIDTH) && (speedX > 0))
-        {
-            speedX = -speedX;
-        }
-        if ((x < 0) && (speedX < 0))
-        {
-            speedX = -speedX;
-        }
-
-        ball.setPosition(position + offset);
+        const float dt = clock.getElapsedTime().asSeconds();
+        float phase = dt * float(2 * M_PI * 200) / float(pointCount);
+        float x = 100 * std::sin(phase / period);
+        float y = 100 * std::cos(phase / period);
+        sf::Vector2f offset = {x, y};
+        ellipse.setPosition(ellipseRadius + offset);
 
         window.clear();
-        window.draw(ball);
+        window.draw(ellipse);
         window.display();
     }
 }
