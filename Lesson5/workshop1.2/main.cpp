@@ -19,6 +19,7 @@ void initCursor(sf::ConvexShape &shape)
     shape.setOutlineColor(sf::Color(0, 0, 0));
     shape.setOutlineThickness(3);
     shape.setRotation(-85);
+    shape.setOrigin(60, -25);
 }
 
 float toDegrees(float radians)
