@@ -4,12 +4,12 @@
 
 void init(sf::Texture &texture, sf::Sprite &cat, sf::Texture &textpointer, sf::Sprite &pointer)
 {
-    texture.loadFromFile("image/cat.png");
+    texture.loadFromFile("workshop1.4/cat.png");
     cat.setTexture(texture);
     cat.setPosition(100, 500);
     cat.setOrigin(texture.getSize().x / 2, texture.getSize().y / 2);
 
-    textpointer.loadFromFile("image/pointer.png");
+    textpointer.loadFromFile("workshop1.4/pointer.png");
     pointer.setTexture(textpointer);
     pointer.setPosition(100, 100);
     pointer.setOrigin(textpointer.getSize().x / 2, textpointer.getSize().y / 2);

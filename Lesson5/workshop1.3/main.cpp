@@ -3,7 +3,7 @@ using namespace sf;
 
 void init(Texture &texture, Sprite &cat)
 {
-    texture.loadFromFile("image/cat.png");
+    texture.loadFromFile("workshop1.3/cat.png");
     cat.setTexture(texture);
     cat.setPosition(100, 500);
 }
