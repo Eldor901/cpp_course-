@@ -33,12 +33,12 @@ void init(std::vector<Circle> &circles)
         {400, 500},
         {50, 500},
         {600, 100}};
-    for (size_t i = 0; i < 5; ++i)
+    for (size_t fi = 0; fi < circles.size(); ++fi)
     {
-        circles[i].shapes.setPosition(positions[i]);
-        circles[i].shapes.setRadius(BALL_SIZE);
-        circles[i].shapes.setFillColor(colors[i]);
-        circles[i].speed = speeds[i];
+        circles[fi].shapes.setPosition(positions[fi]);
+        circles[fi].shapes.setRadius(BALL_SIZE);
+        circles[fi].shapes.setFillColor(colors[fi]);
+        circles[fi].speed = speeds[fi];
     }
 }
 
@@ -61,36 +61,36 @@ void pollEvents(sf::RenderWindow &window)
 void update(std::vector<Circle> &circles, float &dt)
 {
 
-    for (size_t i = 0; i < 5; ++i)
+    for (size_t fi = 0; fi < circles.size(); ++fi)
     {
-        sf::Vector2f position = circles[i].shapes.getPosition();
-        position += circles[i].speed * dt;
+        sf::Vector2f position = circles[fi].shapes.getPosition();
+        position += circles[fi].speed * dt;
 
-        if ((position.x + 2 * BALL_SIZE >= WINDOW_WIDTH) && (circles[i].speed.x > 0))
+        if ((position.x + 2 * BALL_SIZE >= WINDOW_WIDTH) && (circles[fi].speed.x > 0))
         {
-            circles[i].speed.x = -circles[i].speed.x;
+            circles[fi].speed.x = -circles[fi].speed.x;
         }
-        if ((position.x < 0) && (circles[i].speed.x < 0))
+        if ((position.x < 0) && (circles[fi].speed.x < 0))
         {
-            circles[i].speed.x = -circles[i].speed.x;
+            circles[fi].speed.x = -circles[fi].speed.x;
         }
-        if ((position.y + 2 * BALL_SIZE >= WINDOW_HEIGHT) && (circles[i].speed.y > 0))
+        if ((position.y + 2 * BALL_SIZE >= WINDOW_HEIGHT) && (circles[fi].speed.y > 0))
         {
-            circles[i].speed.y = -circles[i].speed.y;
+            circles[fi].speed.y = -circles[fi].speed.y;
         }
-        if ((position.y < 0) && (circles[i].speed.y < 0))
+        if ((position.y < 0) && (circles[fi].speed.y < 0))
         {
-            circles[i].speed.y = -circles[i].speed.y;
+            circles[fi].speed.y = -circles[fi].speed.y;
         }
-        circles[i].shapes.setPosition(position);
+        circles[fi].shapes.setPosition(position);
     }
 }
 void redrawFrame(sf::RenderWindow &window, std::vector<Circle> &circles)
 {
     window.clear();
-    for (size_t i = 0; i < 5; ++i)
+    for (size_t fi = 0; fi < circles.size(); ++fi)
     {
-        window.draw(circles[i].shapes);
+        window.draw(circles[fi].shapes);
     }
     window.display();
 }

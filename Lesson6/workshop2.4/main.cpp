@@ -1,168 +1,180 @@
 #include <SFML/Graphics.hpp>
-#include <vector>
+#include <SFML/Window.hpp>
 #include <cmath>
+#include <iostream>
 #include <random>
 #include <ctime>
-
+constexpr float BALL_SIZE = 40;
+constexpr int BALLS_COUNT = 5;
 constexpr unsigned WINDOW_WIDTH = 800;
 constexpr unsigned WINDOW_HEIGHT = 600;
-constexpr unsigned BALL_SIZE = 40;
-using namespace std;
 
-struct Circle
+struct Ball
 {
     sf::CircleShape shapes;
     sf::Vector2f speed;
 };
+
 struct PRNG
 {
     std::mt19937 engine;
 };
+
 void initGenerator(PRNG &generator)
 {
     const unsigned seed = unsigned(std::time(nullptr));
     generator.engine.seed(seed);
 }
-float GetRandomSpeed(PRNG &generator, float minValue, float maxValue)
+
+unsigned RandomSpeed(PRNG &generator, unsigned minValue, unsigned maxValue)
 {
-    std::uniform_real_distribution<float> distribution(minValue, maxValue);
-    return distribution(generator.engine);
-}
-size_t GetRandomColor(PRNG &generator, size_t variable1, size_t variable2)
-{
-    std::uniform_int_distribution<size_t> distribution(variable1, variable2);
+    std::uniform_int_distribution<unsigned> distribution(minValue, maxValue);
     return distribution(generator.engine);
 }
 
-void init(vector<Circle> &circles)
+unsigned RandomColor(PRNG &generator)
+{
+    std::uniform_int_distribution<unsigned> distribution(0, 255);
+    return distribution(generator.engine);
+}
+
+unsigned Random(PRNG &generator)
+{
+    std::uniform_int_distribution<unsigned> distribution(0, 0);
+    return distribution(generator.engine);
+}
+
+void init(std::vector<Ball> &balls, const float BALL_SIZE)
 {
     PRNG generator;
     initGenerator(generator);
-    const float minAvalaibleSpeed = -200;
-    const float maxAvalaibleSpeed = 200;
     sf::Color color;
 
-    const vector<sf::Color> colors = {sf::Color(0, 0, 51),
-                                      sf::Color(0, 204, 204),
-                                      sf::Color(102, 0, 153),
-                                      sf::Color(204, 51, 102),
-                                      sf::Color(255, 255, 0),
-                                      sf::Color(204, 255, 153),
-                                      sf::Color(102, 0, 204),
-                                      sf::Color(102, 0, 0)};
-
-    const vector<sf::Vector2f>
-        positions = {
-            {100, 100},
-            {200, 300},
-            {400, 500},
-            {50, 500},
-            {600, 100}};
-
-    vector<sf::Vector2f> speeds{{0, 0}};
-    for (size_t i = 0; i < 5; ++i)
+    for (size_t fi = 0; fi < balls.size(); ++fi)
     {
-        float X = GetRandomSpeed(generator, minAvalaibleSpeed, maxAvalaibleSpeed);
-        float Y = GetRandomSpeed(generator, minAvalaibleSpeed, maxAvalaibleSpeed);
-        speeds[i] = {X, Y};
-
-        size_t j = GetRandomColor(generator, 0, 7);
-        size_t k = GetRandomColor(generator, 0, 7);
-        color.r = (colors[j].r + colors[k].r) / 2;
-        color.b = (colors[j].b + colors[k].b) / 2;
-        color.g = (colors[j].g + colors[k].g) / 2;
-
-        circles[i].shapes.setPosition(positions[i]);
-        circles[i].shapes.setRadius(BALL_SIZE);
-        circles[i].shapes.setFillColor(color);
-        circles[i].speed = speeds[i];
+        float signX = Random(generator);
+        float signY = Random(generator);
+        float randomSpeedX = RandomSpeed(generator, 100, 200) * pow(1.0, signX);
+        float randomSpeedY = RandomSpeed(generator, 100, 200) * pow(1.0, signY);
+        balls[fi].speed = {randomSpeedX, randomSpeedY};
+        balls[fi].shapes.setRadius(BALL_SIZE);
+        color.r = RandomColor(generator);
+        color.b = RandomColor(generator);
+        color.g = RandomColor(generator);
+        balls[fi].shapes.setFillColor(color);
     }
+
+    balls[0].shapes.setPosition({100, 300});
+    balls[1].shapes.setPosition({300, 300});
+    balls[2].shapes.setPosition({400, 300});
+    balls[3].shapes.setPosition({600, 300});
+    balls[4].shapes.setPosition({700, 300});
 }
 
 void pollEvents(sf::RenderWindow &window)
 {
-    sf::Event event{};
+    sf::Event event;
     while (window.pollEvent(event))
     {
-        switch (event.type)
+        if (event.type == sf::Event::Closed)
         {
-        case sf::Event::Closed:
             window.close();
-            break;
-        default:
-            break;
         }
     }
 }
 
-void update(vector<Circle> &circles, float &dt)
-{
-    for (size_t i = 0; i < 5; ++i)
-    {
-        for (size_t j = i + 1; j < 5; ++j)
-        {
-            sf::Vector2f direction = circles[i].shapes.getPosition() - circles[j].shapes.getPosition();
-            float distance1 = std::sqrt(std::pow(direction.x, 2) + std::pow(direction.y, 2));
-            float distance2 = 2 * BALL_SIZE;
-            if (distance1 <= distance2)
-            {
-                sf::Vector2f acceleration = circles[i].speed - circles[j].speed;
-                float direction2 = acceleration.x * direction.x + acceleration.y * direction.y;
-                circles[i].speed = circles[i].speed - direction2 / float(std::pow(distance1, 2)) * direction;
-                circles[j].speed = circles[j].speed + direction2 / float(std::pow(distance1, 2)) * direction;
-            }
-        }
-    }
-
-    for (size_t i = 0; i < 5; ++i)
-    {
-        sf::Vector2f position = circles[i].shapes.getPosition();
-        position += circles[i].speed * dt;
-
-        if ((position.x + 2 * BALL_SIZE >= WINDOW_WIDTH) && (circles[i].speed.x > 0))
-        {
-            circles[i].speed.x = -circles[i].speed.x;
-        }
-        if ((position.x < 0) && (circles[i].speed.x < 0))
-        {
-            circles[i].speed.x = -circles[i].speed.x;
-        }
-        if ((position.y + 2 * BALL_SIZE >= WINDOW_HEIGHT) && (circles[i].speed.y > 0))
-        {
-            circles[i].speed.y = -circles[i].speed.y;
-        }
-        if ((position.y < 0) && (circles[i].speed.y < 0))
-        {
-            circles[i].speed.y = -circles[i].speed.y;
-        }
-        circles[i].shapes.setPosition(position);
-    }
-}
-void redrawFrame(sf::RenderWindow &window, std::vector<Circle> &circles)
+void redrawFrame(sf::RenderWindow &window, std::vector<Ball> &balls)
 {
     window.clear();
-    for (size_t i = 0; i < 5; ++i)
+    for (size_t fi = 0; fi < balls.size(); ++fi)
     {
-        window.draw(circles[i].shapes);
+        window.draw(balls[fi].shapes);
     }
     window.display();
 }
+
+float Lenth(sf::Vector2f &argument)
+{
+    return (pow((pow(argument.x, 2.0) + pow(argument.y, 2.0)), 0.5));
+}
+
+float Len(sf::Vector2f speedVector, sf::Vector2f posVector)
+{
+    return ((speedVector.x * posVector.x) + (speedVector.y * posVector.y));
+}
+
+void speedUpdate(std::vector<Ball> &balls, size_t fi, size_t si)
+{
+    sf::Vector2f deltaPos = balls[fi].shapes.getPosition() - balls[si].shapes.getPosition();
+    sf::Vector2f deltaSpeed = balls[fi].speed - balls[si].speed;
+    float speedX = balls[fi].speed.x - (Len(deltaSpeed, deltaPos) / pow(Lenth(deltaPos), 2.0)) * deltaPos.x;
+    float speedY = balls[fi].speed.y - (Len(deltaSpeed, deltaPos) / pow(Lenth(deltaPos), 2.0)) * deltaPos.y;
+    balls[fi].speed = {speedX, speedY};
+
+    deltaPos = -deltaPos;
+    deltaSpeed = -deltaSpeed;
+    speedX = balls[si].speed.x - (Len(deltaSpeed, deltaPos) / pow(Lenth(deltaPos), 2.0)) * deltaPos.x;
+    speedY = balls[si].speed.y - (Len(deltaSpeed, deltaPos) / pow(Lenth(deltaPos), 2.0)) * deltaPos.y;
+    balls[si].speed = {speedX, speedY};
+}
+
+void checkColision(std::vector<Ball> &balls, const float BALL_SIZE)
+{
+    for (size_t fi = 0; fi < balls.size(); ++fi)
+    {
+        for (size_t si = fi + 1; si < balls.size(); ++si)
+        {
+            sf::Vector2f delta = balls[fi].shapes.getPosition() - balls[si].shapes.getPosition();
+            if (Lenth(delta) <= BALL_SIZE * 2)
+            {
+                speedUpdate(balls, fi, si);
+            }
+        }
+    }
+}
+
+void update(const unsigned WINDOW_WIDTH, const unsigned WINDOW_HEIGHT, const float dt, const float BALL_SIZE, std::vector<Ball> &balls)
+{
+    checkColision(balls, BALL_SIZE);
+    for (size_t i = 0; i < balls.size(); ++i)
+    {
+        sf::Vector2f position = balls[i].shapes.getPosition();
+
+        if ((position.x + 2 * BALL_SIZE >= WINDOW_WIDTH) && (balls[i].speed.x > 0))
+        {
+            balls[i].speed.x = -balls[i].speed.x;
+        }
+        if ((position.x < 0) && (balls[i].speed.x < 0))
+        {
+            balls[i].speed.x = -balls[i].speed.x;
+        }
+        if ((position.y + 2 * BALL_SIZE >= WINDOW_HEIGHT) && (balls[i].speed.y > 0))
+        {
+            balls[i].speed.y = -balls[i].speed.y;
+        }
+        if ((position.y < 0) && (balls[i].speed.y < 0))
+        {
+            balls[i].speed.y = -balls[i].speed.y;
+        }
+        balls[i].shapes.setPosition(position + balls[i].speed * dt);
+    }
+}
+
 int main()
 {
-    sf::ContextSettings settings;
-    settings.antialiasingLevel = 8;
 
-    sf::RenderWindow window(sf::VideoMode({WINDOW_WIDTH, WINDOW_HEIGHT}),
-                            "Circles are moving towards screen", sf::Style::Default, settings);
-
+    sf::RenderWindow window(sf::VideoMode({WINDOW_WIDTH, WINDOW_HEIGHT}), "Wave Moving Ball");
     sf::Clock clock;
-    std::vector<Circle> circles(5);
-    init(circles);
+
+    std::vector<Ball> balls(BALLS_COUNT);
+
+    init(balls, BALL_SIZE);
+
     while (window.isOpen())
     {
         pollEvents(window);
-        float dt = clock.restart().asSeconds();
-        update(circles, dt);
-        redrawFrame(window, circles);
+        const float dt = clock.restart().asSeconds();
+        update(WINDOW_WIDTH, WINDOW_HEIGHT, dt, BALL_SIZE, balls);
+        redrawFrame(window, balls);
     }
 }
