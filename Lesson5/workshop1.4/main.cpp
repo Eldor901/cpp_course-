@@ -11,7 +11,7 @@ void init(sf::Texture &texture, sf::Sprite &cat, sf::Texture &textpointer, sf::S
 
     textpointer.loadFromFile("pointer.png");
     pointer.setTexture(textpointer);
-    pointer.setPosition(100, 100);
+    pointer.setPosition(100, 500);
     pointer.setOrigin(textpointer.getSize().x / 2, textpointer.getSize().y / 2);
 }
 void onMouseClick(const sf::Event::MouseButtonEvent &event, sf::Vector2f &mousePosition)
@@ -82,7 +82,7 @@ int main()
     sf::Texture textpointer;
     sf::Sprite pointer;
 
-    sf::Vector2f mousePosition = {500, 100};
+    sf::Vector2f mousePosition = {100, 500};
     init(texture, cat, textpointer, pointer);
 
     while (window.isOpen())
